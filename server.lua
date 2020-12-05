@@ -34,14 +34,13 @@ function cmd_buried_stuff(_player)
     local object = CreateObject(2, Px, Py, Pz)
 
     -- register bs
-    new_registry_buried_stuff(_player, Px, Py, Pz)
-    
+    new_registry_buried_stuff(_player, object, Px, Py, Pz)
 end
 
--- teleport to burieed stuff
+-- teleport to buried stuff
 function cmd_buried_teleport(_player, _id)
     local identifier = tonumber(_id)
-    if(BURIED_LIST[identifier] == nil) then 
+    if(not IfIdIsValid(identifier)) then 
         AddPlayerChat(_player, "invalid identifier")
         return nil
     end
@@ -51,28 +50,50 @@ function cmd_buried_teleport(_player, _id)
     AddPlayerChat(_player, "OK teleport")
 end
 
+-- destroy buried stuff
+function cmd_buried_delete(_player,  _id)
+    local identifier = tonumber(_id)
+    if(not IfIdIsValid(identifier)) then 
+        AddPlayerChat(_player, "invalid identifier")
+        return nil
+    end
+
+    DestroyObject(BURIED_LIST[identifier].objectid)
+    BURIED_LIST[identifier] = nil
+end
 
 AddCommand("get", cmd_get_detector)
 AddCommand("destroy", cmd_destroy_attached)
 AddCommand("new_buried", cmd_buried_stuff)
 AddCommand("tp_buried", cmd_buried_teleport)
+AddCommand("destroy_buried", cmd_buried_delete)
 
 -- FUNC
 -- registry buried
-function new_registry_buried_stuff(_playerID, _PosX, _PosY, _PosZ)
-    if(_playerID == nil or _PosX == nil or _PosY == nil or _PosZ == nil) then
+function new_registry_buried_stuff(_playerID, _Object, _PosX, _PosY, _PosZ)
+    if(_playerID == nil or _PosX == nil or _PosY == nil or _PosZ == nil or _Object == nil) then
         Print("[buried_Stuff] registry error nill parameter")
         return nil
     end
 
     local index_id = tablelength(BURIED_LIST) + 1
-    print("-> new registry buried stuff : ", index_id, _playerID, _PosX, _PosY, _PosZ)
+    print("-> new registry buried stuff : ", index_id, _Object , _playerID, _PosX, _PosY, _PosZ)
     BURIED_LIST[index_id]= {}
+    BURIED_LIST[index_id].objectid = _Object
     BURIED_LIST[index_id].createAt = os.time(os.date("!*t"))
     BURIED_LIST[index_id].playerId = _playerID
     BURIED_LIST[index_id].x = _PosX
     BURIED_LIST[index_id].y = _PosY
     BURIED_LIST[index_id].z = _PosZ
+end
+
+-- check if id is valid
+function IfIdIsValid(_id)
+    if(BURIED_LIST[_id] == nil) then 
+        return false
+    end
+
+    return true
 end
 
 
@@ -84,6 +105,7 @@ function cmd_view_bureied_stuff(_player)
     for i, v in pairs(BURIED_LIST) do 
         AddPlayerChat(_player, "------------------------")
         AddPlayerChat(_player, "buried id : [" .. i .. "]")
+        AddPlayerChat(_player, "onbject id : [" .. v.objectid .. "]")
         AddPlayerChat(_player, "create at : [" .. v.createAt .. "]")
         AddPlayerChat(_player, "player id :" .. v.playerId)
         AddPlayerChat(_player, "x :" .. v.x)
