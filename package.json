@@ -2,6 +2,8 @@
 	"author": "ck_hunt",
 	"version": "1.1",
 	"server_scripts": [
-		"server.lua"
+		"utils.lua",
+		"mesh.lua",
+		"manage.lua"
 	]
 }
